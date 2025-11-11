@@ -1,13 +1,3 @@
-envVarGroups:
-  - name: tg-clicker-secrets
-    # Значения не храним в репозитории. Добавите их в UI Render.
-    # sync: false — позволяет управлять значениями через панель Render.
-    envVars:
-      - key: BOT_TOKEN
-        sync: false
-      - key: WEBAPP_URL
-        sync: false
-
 services:
   - type: web
     name: tg-clicker-web
@@ -20,16 +10,9 @@ services:
     envVars:
       - key: PYTHON_VERSION
         value: 3.11
-      - fromGroup: tg-clicker-secrets
-
-  - type: worker
-    name: tg-clicker-bot
-    env: python
-    plan: free
-    buildCommand: pip install -r requirements.txt
-    startCommand: python bot.py
-    autoDeploy: true
-    envVars:
-      - key: PYTHON_VERSION
-        value: 3.11
-      - fromGroup: tg-clicker-secrets
+      - key: BOT_TOKEN
+        sync: false
+      - key: WEBAPP_URL
+        sync: false
+      - key: WEBHOOK_SECRET
+        sync: false

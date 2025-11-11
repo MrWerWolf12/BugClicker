@@ -28,8 +28,8 @@ async def on_start(msg: Message):
     await msg.answer("Нажми кнопку, чтобы открыть мини‑приложение.", reply_markup=kb)
 
 async def main():
-    print("Bot started")
-    await dp.start_polling(bot)
+    print("Bot started (long polling)")
+    await dp.start_polling(bot, allowed_updates=dp.resolve_used_update_types())
 
 if __name__ == "__main__":
     asyncio.run(main())

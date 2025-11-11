@@ -1,21 +1,92 @@
-from fastapi import FastAPI, Request, HTTPException
-from fastapi.responses import HTMLResponse, JSONResponse
-from pydantic import BaseModel
-from typing import Dict, Any
-import hmac, hashlib, json, os
+import os
+import json
+import hmac
+import hashlib
 from urllib.parse import parse_qsl
-from dotenv import load_dotenv
 from collections import defaultdict
+from typing import Dict, Any
+
+from dotenv import load_dotenv
+from fastapi import FastAPI, Request, HTTPException
+from fastapi.responses import HTMLResponse, JSONResponse, PlainTextResponse
+
+from pydantic import BaseModel
+
+from aiogram import Bot, Dispatcher, types
+from aiogram.filters import CommandStart
+from aiogram.types import ReplyKeyboardMarkup, KeyboardButton, WebAppInfo
 
 load_dotenv()
+
 BOT_TOKEN = os.getenv("BOT_TOKEN")
+WEBAPP_URL = os.getenv("WEBAPP_URL", "").rstrip("/")
+WEBHOOK_SECRET = os.getenv("WEBHOOK_SECRET")
+
 if not BOT_TOKEN:
+    # Без BOT_TOKEN нельзя валидировать initData — останавливаем сервер
     raise RuntimeError("BOT_TOKEN is not set")
+
+# Инициализируем бота и диспетчер (webhook-режим)
+bot = Bot(BOT_TOKEN)
+dp = Dispatcher()
 
 app = FastAPI()
 
 # Хранилище для демо (в памяти): user_id -> count
 user_clicks: Dict[int, int] = defaultdict(int)
+
+# -------------------- Telegram bot handlers --------------------
+
+@dp.message(CommandStart())
+async def on_start(msg: types.Message):
+    if not WEBAPP_URL:
+        await msg.answer("Веб-приложение еще не настроено. Сообщите администратору.")
+        return
+
+    kb = ReplyKeyboardMarkup(
+        resize_keyboard=True,
+        keyboard=[
+            [KeyboardButton(text="Открыть кликер", web_app=WebAppInfo(url=WEBAPP_URL))]
+        ]
+    )
+    await msg.answer("Нажми кнопку, чтобы открыть мини‑приложение.", reply_markup=kb)
+
+# -------------------- Webhook setup --------------------
+
+@app.on_event("startup")
+async def on_startup():
+    # Регистрируем webhook, если заданы WEBAPP_URL и WEBHOOK_SECRET
+    if WEBAPP_URL and WEBHOOK_SECRET:
+        url = f"{WEBAPP_URL}/webhook/{WEBHOOK_SECRET}"
+        try:
+            await bot.delete_webhook(drop_pending_updates=True)
+            await bot.set_webhook(url, secret_token=WEBHOOK_SECRET)
+            print(f"[Webhook] Set to {url}")
+        except Exception as e:
+            print(f"[Webhook] Failed to set: {e}")
+    else:
+        print("[Webhook] Skipped (WEBAPP_URL or WEBHOOK_SECRET is missing). Bot won't receive updates.")
+
+@app.on_event("shutdown")
+async def on_shutdown():
+    await bot.session.close()
+
+# Прием апдейтов от Telegram
+@app.post("/webhook/{token}")
+async def telegram_webhook(token: str, request: Request):
+    # Проверяем секрет в пути и заголовке, чтобы блокировать чужие вызовы
+    if WEBHOOK_SECRET and token != WEBHOOK_SECRET:
+        raise HTTPException(status_code=401, detail="Invalid webhook token")
+    header_secret = request.headers.get("x-telegram-bot-api-secret-token")
+    if WEBHOOK_SECRET and header_secret != WEBHOOK_SECRET:
+        raise HTTPException(status_code=401, detail="Invalid secret header")
+
+    data = await request.json()
+    update = types.Update.model_validate(data)
+    await dp.feed_update(bot, update)
+    return JSONResponse({"ok": True})
+
+# -------------------- Mini App frontend + API --------------------
 
 def verify_init_data(init_data: str) -> Dict[str, Any]:
     """
@@ -31,14 +102,11 @@ def verify_init_data(init_data: str) -> Dict[str, Any]:
         raise HTTPException(status_code=401, detail="Missing hash")
 
     data_check_string = "\n".join(f"{k}={parsed[k]}" for k in sorted(parsed.keys()))
-
-    # HMAC_SHA256("WebAppData", bot_token)
     secret_key = hmac.new(
         key=b"WebAppData",
         msg=BOT_TOKEN.encode(),
         digestmod=hashlib.sha256
     ).digest()
-
     calculated_hash = hmac.new(
         key=secret_key,
         msg=data_check_string.encode(),
@@ -48,10 +116,9 @@ def verify_init_data(init_data: str) -> Dict[str, Any]:
     if calculated_hash != received_hash:
         raise HTTPException(status_code=401, detail="Invalid init data signature")
 
-    # Преобразуем JSON-поля
     result = {}
     for k, v in parsed.items():
-        if k in ("user", "receiver", "chat", "start_param"):
+        if k in ("user", "receiver", "chat"):
             try:
                 result[k] = json.loads(v)
             except Exception:
@@ -215,3 +282,8 @@ async def do_click(request: Request, _: ClickPayload):
     user_id = extract_user_id_from_init_data(init_data)
     user_clicks[user_id] += 1
     return JSONResponse({"ok": True, "count": user_clicks[user_id]})
+
+# Простой healthcheck, если понадобится
+@app.get("/healthz")
+async def healthz():
+    return PlainTextResponse("ok")
