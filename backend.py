@@ -76,9 +76,7 @@ INDEX_HTML = """
   <title>Кликер</title>
   <script src="https://telegram.org/js/telegram-web-app.js"></script>
   <style>
-    :root {
-      color-scheme: light dark;
-    }
+    :root { color-scheme: light dark; }
     body { font-family: system-ui, -apple-system, Segoe UI, Roboto, sans-serif; 
            margin: 0; padding: 20px; background: var(--tg-theme-bg-color, #0f0f10); color: var(--tg-theme-text-color, #fff); }
     .card { max-width: 520px; margin: 0 auto; background: rgba(255,255,255,0.06); border-radius: 16px; padding: 20px; }
