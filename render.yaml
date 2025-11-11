@@ -1,0 +1,32 @@
+services:
+  - type: web
+    name: tg-clicker-web
+    env: python
+    plan: free
+    buildCommand: pip install -r requirements.txt
+    startCommand: uvicorn backend:app --host 0.0.0.0 --port $PORT
+    healthCheckPath: /
+    autoDeploy: true
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.11
+      - key: BOT_TOKEN
+        fromSecret: BOT_TOKEN
+
+  - type: worker
+    name: tg-clicker-bot
+    env: python
+    plan: free
+    buildCommand: pip install -r requirements.txt
+    startCommand: python bot.py
+    autoDeploy: true
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.11
+      - key: BOT_TOKEN
+        fromSecret: BOT_TOKEN
+      - key: WEBAPP_URL
+        fromService:
+          type: web
+          name: tg-clicker-web
+          property: url
