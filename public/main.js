@@ -102,15 +102,24 @@ class ClickerGame {
         this.highScore = userData.high_score || 0;
         this.coins = userData.coins || 0;
         
+        // Загрузка улучшений
         if (userData.upgrades) {
-          const savedUpgrades = JSON.parse(userData.upgrades || '{}');
-          Object.keys(savedUpgrades).forEach(key => {
-            if (this.upgrades[key]) {
-              this.upgrades[key] = savedUpgrades[key];
-            }
-          });
+          try {
+            const savedUpgrades = typeof userData.upgrades === 'string' 
+              ? JSON.parse(userData.upgrades) 
+              : userData.upgrades;
+              
+            Object.keys(savedUpgrades).forEach(key => {
+              if (this.upgrades[key]) {
+                this.upgrades[key] = savedUpgrades[key];
+              }
+            });
+          } catch (e) {
+            console.error('Error parsing upgrades:', e);
+          }
         }
         
+        // Пересчитываем силу клика
         this.clickPower = this.calculateClickPower();
         this.achievements = JSON.parse(userData.achievements || '[]');
         
@@ -133,6 +142,7 @@ class ClickerGame {
     if (!this.telegramId) return;
 
     try {
+      // Обновляем рекорд если нужно
       if (this.score > this.highScore) {
         this.highScore = this.score;
       }
@@ -181,28 +191,40 @@ class ClickerGame {
   handleClick(event) {
     if (!this.telegramId) return;
 
+    // Воспроизвести звук
     this.clickSound.currentTime = 0;
     this.clickSound.play().catch(e => console.log('Звук заблокирован браузером'));
 
+    // Увеличить счет и монеты (одинаковое количество)
     this.score += this.clickPower;
-    this.coins += 1;
+    this.coins += this.clickPower; // Теперь монеты = очки за клик
     
+    // Создать анимацию клика
     this.createClickAnimation(event);
+    
+    // Проверить уровень
     this.checkLevelUp();
+    
+    // Проверить достижения
     this.checkAchievements();
+    
+    // Обновить отображение
     this.updateDisplay();
     
+    // Автоматическое сохранение каждые 10 кликов
     if (this.score % 10 === 0) {
       this.saveGame();
     }
   }
 
   createClickAnimation(event) {
+    // Анимация изображения
     this.clickable.classList.add('click-animation');
     setTimeout(() => {
       this.clickable.classList.remove('click-animation');
     }, 300);
 
+    // Создать всплывающее число
     const bonus = document.createElement('div');
     bonus.className = 'bonus';
     bonus.textContent = `+${this.clickPower}`;
@@ -210,6 +232,7 @@ class ClickerGame {
     bonus.style.top = (event.clientY - 20) + 'px';
     document.body.appendChild(bonus);
 
+    // Удалить элемент после анимации
     setTimeout(() => {
       bonus.remove();
     }, 1000);
@@ -219,6 +242,7 @@ class ClickerGame {
     let currentLevel = 1;
     let totalPointsNeeded = 0;
     
+    // Считаем, какой уровень должен быть при текущем количестве очков
     while (true) {
       const pointsForNextLevel = this.getPointsToNextLevel(currentLevel);
       if (totalPointsNeeded + pointsForNextLevel > this.score) {
@@ -228,16 +252,19 @@ class ClickerGame {
       currentLevel++;
     }
     
+    // Если уровень повысился
     if (currentLevel > this.level) {
       const oldLevel = this.level;
       this.level = currentLevel;
       this.clickPower = this.calculateClickPower();
       
+      // Анимация повышения уровня
       this.levelElement.parentElement.classList.add('level-up');
       setTimeout(() => {
         this.levelElement.parentElement.classList.remove('level-up');
       }, 1000);
       
+      // Показываем сообщения для каждого уровня
       for (let i = oldLevel + 1; i <= this.level; i++) {
         setTimeout(() => {
           this.showLevelUpMessage(i);
@@ -264,13 +291,14 @@ class ClickerGame {
   }
 
   calculateClickPower() {
-    let power = 1;
+    let power = 1; // Базовая сила
     
+    // Суммируем все улучшения
     Object.values(this.upgrades).forEach(upgrade => {
       power += upgrade.level * upgrade.multiplier;
     });
     
-    return Math.max(1, power);
+    return Math.max(1, power); // Минимум 1
   }
 
   buyUpgrade(upgradeKey) {
@@ -281,6 +309,7 @@ class ClickerGame {
       this.coins -= currentCost;
       upgrade.level++;
       
+      // Пересчитываем силу клика
       this.clickPower = this.calculateClickPower();
       
       this.updateDisplay();
@@ -355,6 +384,7 @@ class ClickerGame {
         upgradeElement.classList.add('unavailable');
       }
       
+      // Специальный класс для Яндекс улучшений
       if (key.includes('yandex')) {
         upgradeElement.classList.add('yandex-theme');
       }
@@ -404,6 +434,7 @@ class ClickerGame {
       }
     });
 
+    // Сохраняем, если есть новые достижения
     if (newAchievements) {
       this.saveGame();
     }
@@ -417,6 +448,7 @@ class ClickerGame {
     const achievementElement = document.createElement('div');
     achievementElement.className = 'achievement';
     
+    // Специальные достижения с особым оформлением
     if (name.includes('20') || name.includes('Мега') || name.includes('Мастер')) {
       achievementElement.classList.add('special');
     }
@@ -424,6 +456,7 @@ class ClickerGame {
     achievementElement.textContent = `🏆 ${name}`;
     this.achievementsContainer.appendChild(achievementElement);
 
+    // Анимация появления
     achievementElement.style.opacity = '0';
     achievementElement.style.transform = 'translateY(20px)';
     setTimeout(() => {
@@ -476,6 +509,7 @@ class ClickerGame {
       this.progressFill.style.width = Math.min(100, percentage) + '%';
     }
     
+    // Добавляем специальный класс для высоких уровней
     if (this.progressFill && this.progressFill.parentElement) {
       if (this.level >= 10) {
         this.progressFill.parentElement.classList.add('high-level');
@@ -484,6 +518,7 @@ class ClickerGame {
       }
     }
     
+    // Добавляем специальный класс для максимального изображения
     if (this.clickable) {
       if (this.level >= 20) {
         this.clickable.classList.add('max-level');
@@ -496,13 +531,15 @@ class ClickerGame {
       this.progressText.textContent = `${progress.current} / ${progress.required} очков до следующего уровня`;
     }
     
-    // Обновляем магазин при каждом обновлении
+    // Обновляем магазин
     this.renderUpgrades();
   }
 }
 
+// Инициализация игры
 const game = new ClickerGame();
 
+// Глобальные функции для обработки кликов
 function handleClick(event) {
   game.handleClick(event);
 }
@@ -515,12 +552,14 @@ function loadGame() {
   game.loadGame();
 }
 
+// Предзагрузка звука
 window.addEventListener('load', () => {
   if (game.clickSound) {
     game.clickSound.load();
   }
 });
 
+// Автоматическое сохранение при уходе со страницы
 window.addEventListener('beforeunload', () => {
   if (game.telegramId) {
     game.saveGame();
