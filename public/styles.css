@@ -6,21 +6,37 @@ body {
   min-height: 100vh;
   padding: 20px;
   box-sizing: border-box;
+  color: #333;
 }
 
 .container {
   max-width: 500px;
   margin: 0 auto;
-  background: rgba(255, 255, 255, 0.9);
+  background: rgba(255, 255, 255, 0.95);
   border-radius: 20px;
   padding: 20px;
   box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+  backdrop-filter: blur(10px);
 }
 
 h1 {
   color: #333;
   margin-bottom: 10px;
   font-size: 2em;
+  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.user-info {
+  background: linear-gradient(135deg, #e3f2fd, #bbdefb);
+  padding: 15px;
+  border-radius: 15px;
+  margin-bottom: 20px;
+  font-size: 0.9em;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+}
+
+.user-info div {
+  margin: 5px 0;
 }
 
 .stats {
@@ -29,13 +45,21 @@ h1 {
   margin: 20px 0;
   font-size: 1.2em;
   font-weight: bold;
+  flex-wrap: wrap;
+  gap: 10px;
 }
 
 .stat-item {
-  background: #f0f0f0;
-  padding: 10px;
-  border-radius: 10px;
+  background: linear-gradient(135deg, #f0f0f0, #e0e0e0);
+  padding: 15px;
+  border-radius: 15px;
   min-width: 100px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  transition: transform 0.2s ease;
+}
+
+.stat-item:hover {
+  transform: translateY(-2px);
 }
 
 #clickable {
@@ -44,7 +68,10 @@ h1 {
   cursor: pointer;
   transition: transform 0.1s ease;
   border-radius: 50%;
-  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
+  margin: 20px auto;
+  display: block;
+  border: 3px solid #fff;
 }
 
 #clickable:active {
@@ -78,45 +105,262 @@ h1 {
   color: #ff6b6b;
   pointer-events: none;
   animation: floatUp 1s ease-out forwards;
+  text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5);
+  z-index: 100;
 }
 
 @keyframes floatUp {
   0% { 
     opacity: 1; 
-    transform: translateY(0); 
+    transform: translateY(0) scale(1); 
   }
   100% { 
     opacity: 0; 
-    transform: translateY(-50px); 
+    transform: translateY(-50px) scale(1.5); 
   }
 }
 
 .progressBar {
   width: 100%;
-  height: 20px;
+  height: 25px;
   background: #e0e0e0;
-  border-radius: 10px;
-  margin: 15px 0;
+  border-radius: 15px;
+  margin: 20px 0;
   overflow: hidden;
+  box-shadow: inset 0 2px 5px rgba(0, 0, 0, 0.2);
 }
 
 .progressFill {
   height: 100%;
   background: linear-gradient(90deg, #4CAF50, #45a049);
-  border-radius: 10px;
+  border-radius: 15px;
   transition: width 0.3s ease;
+  box-shadow: inset 0 0 10px rgba(0, 0, 0, 0.2);
+}
+
+#progressText {
+  font-size: 1em;
+  color: #666;
+  margin-bottom: 20px;
+  font-weight: 500;
 }
 
 .achievements {
-  margin-top: 20px;
-  font-size: 0.9em;
-  color: #666;
+  margin-top: 25px;
+  padding: 15px;
+  background: #f8f9fa;
+  border-radius: 15px;
+  min-height: 60px;
+}
+
+.achievements h3 {
+  margin-top: 0;
+  color: #555;
 }
 
 .achievement {
-  background: #e8f5e8;
-  padding: 5px 10px;
-  margin: 5px;
-  border-radius: 15px;
+  background: linear-gradient(135deg, #e8f5e8, #c8e6c9);
+  padding: 8px 15px;
+  margin: 8px;
+  border-radius: 20px;
   display: inline-block;
+  font-size: 0.9em;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+  animation: slideIn 0.5s ease;
+  border: 1px solid #c8e6c9;
+}
+
+@keyframes slideIn {
+  0% { 
+    opacity: 0; 
+    transform: translateY(20px); 
+  }
+  100% { 
+    opacity: 1; 
+    transform: translateY(0); 
+  }
+}
+
+.actions {
+  margin-top: 25px;
+  display: flex;
+  gap: 15px;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+.save-btn, .load-btn {
+  background: linear-gradient(135deg, #4CAF50, #45a049);
+  color: white;
+  border: none;
+  padding: 12px 20px;
+  margin: 5px;
+  border-radius: 25px;
+  cursor: pointer;
+  font-size: 1em;
+  font-weight: bold;
+  box-shadow: 0 4px 15px rgba(76, 175, 80, 0.3);
+  transition: all 0.3s ease;
+  min-width: 120px;
+}
+
+.load-btn {
+  background: linear-gradient(135deg, #2196F3, #1976D2);
+  box-shadow: 0 4px 15px rgba(33, 150, 243, 0.3);
+}
+
+.save-btn:hover, .load-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
+}
+
+.save-btn:active, .load-btn:active {
+  transform: translateY(0);
+}
+
+.loading {
+  opacity: 0.7;
+  pointer-events: none;
+}
+
+.loading .container {
+  animation: pulseLoading 1.5s ease-in-out infinite;
+}
+
+@keyframes pulseLoading {
+  0% { opacity: 1; }
+  50% { opacity: 0.8; }
+  100% { opacity: 1; }
+}
+
+/* Адаптивность */
+@media (max-width: 600px) {
+  .container {
+    margin: 10px;
+    padding: 15px;
+    border-radius: 15px;
+  }
+  
+  h1 {
+    font-size: 1.5em;
+  }
+  
+  .stats {
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+  }
+  
+  .stat-item {
+    width: 80%;
+    padding: 12px;
+  }
+  
+  #clickable {
+    width: 120px;
+  }
+  
+  .actions {
+    flex-direction: column;
+    align-items: center;
+  }
+  
+  .save-btn, .load-btn {
+    width: 80%;
+    padding: 15px;
+  }
+  
+  .progressBar {
+    height: 20px;
+  }
+}
+
+/* Стили для уведомлений */
+.notification {
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  background: #4CAF50;
+  color: white;
+  padding: 15px 25px;
+  border-radius: 10px;
+  z-index: 1000;
+  font-size: 16px;
+  font-weight: bold;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+  animation: slideInRight 0.3s ease;
+}
+
+@keyframes slideInRight {
+  0% { 
+    opacity: 0; 
+    transform: translateX(100px); 
+  }
+  100% { 
+    opacity: 1; 
+    transform: translateX(0); 
+  }
+}
+
+/* Стили для ошибок */
+.error-notification {
+  background: #f44336;
+  animation: shake 0.5s ease;
+}
+
+@keyframes shake {
+  0%, 100% { transform: translateX(0); }
+  25% { transform: translateX(-5px); }
+  75% { transform: translateX(5px); }
+}
+
+/* Стили для заголовков достижений */
+.achievements h3 {
+  color: #4CAF50;
+  margin-bottom: 15px;
+  font-size: 1.3em;
+  text-align: center;
+}
+
+/* Градиентные эффекты для особых достижений */
+.achievement.special {
+  background: linear-gradient(135deg, #ff6b6b, #ee5a24);
+  color: white;
+  font-weight: bold;
+  box-shadow: 0 4px 15px rgba(255, 107, 107, 0.4);
+}
+
+/* Анимация для новых достижений */
+.achievement.new {
+  animation: glow 2s ease-in-out;
+}
+
+@keyframes glow {
+  0% { box-shadow: 0 0 5px #4CAF50; }
+  50% { box-shadow: 0 0 20px #4CAF50; }
+  100% { box-shadow: 0 0 5px #4CAF50; }
+}
+
+/* Стили для статистики при наведении */
+.stat-item:hover {
+  background: linear-gradient(135deg, #e0e0e0, #d0d0d0);
+}
+
+/* Стили для прогресс-бара при высоком уровне */
+.progressBar.high-level {
+  background: linear-gradient(135deg, #ffeb3b, #ffc107);
+}
+
+/* Стили для изображения при максимальном уровне */
+#clickable.max-level {
+  animation: rainbowGlow 3s infinite;
+  border: 3px solid #ffeb3b;
+}
+
+@keyframes rainbowGlow {
+  0% { box-shadow: 0 0 20px #ff6b6b; }
+  25% { box-shadow: 0 0 20px #4CAF50; }
+  50% { box-shadow: 0 0 20px #2196F3; }
+  75% { box-shadow: 0 0 20px #ff9800; }
+  100% { box-shadow: 0 0 20px #ff6b6b; }
 }
