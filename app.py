@@ -19,36 +19,38 @@ def create_tables():
 
 @app.route('/')
 def index():
-    telegram_id = request.args.get('user')
-    if not telegram_id:
-        return "Ошибка: не указан пользователь", 400
-    
-    user = User.query.filter_by(telegram_id=telegram_id).first()
-    if not user:
-        user = User(telegram_id=telegram_id, clicks=0, level=1)
-        db.session.add(user)
-        db.session.commit()
-    
-    return render_template('index.html', user_id=telegram_id)
+    # Для Telegram Web App получаем user_id из initData
+    return render_template('index.html')
 
 @app.route('/click', methods=['POST'])
 def click():
-    telegram_id = request.json.get('user')
-    user = User.query.filter_by(telegram_id=telegram_id).first()
+    data = request.get_json()
+    telegram_id = data.get('user_id')
     
-    if user:
-        user.clicks += 1
-        if user.clicks >= user.level * 10:  # Повышение уровня каждые 10 кликов
-            user.level += 1
-        db.session.commit()
-        return jsonify({'clicks': user.clicks, 'level': user.level})
-    return jsonify({'error': 'User not found'}), 404
+    if not telegram_id:
+        return jsonify({'error': 'No user_id provided'}), 400
+    
+    user = User.query.filter_by(telegram_id=str(telegram_id)).first()
+    if not user:
+        user = User(telegram_id=str(telegram_id), clicks=0, level=1)
+        db.session.add(user)
+    
+    user.clicks += 1
+    if user.clicks >= user.level * 10:
+        user.level += 1
+    
+    db.session.commit()
+    return jsonify({'clicks': user.clicks, 'level': user.level})
 
-@app.route('/stats')
+@app.route('/stats', methods=['POST'])
 def stats():
-    telegram_id = request.args.get('user')
-    user = User.query.filter_by(telegram_id=telegram_id).first()
+    data = request.get_json()
+    telegram_id = data.get('user_id')
     
+    if not telegram_id:
+        return jsonify({'clicks': 0, 'level': 1})
+    
+    user = User.query.filter_by(telegram_id=str(telegram_id)).first()
     if user:
         return jsonify({'clicks': user.clicks, 'level': user.level})
     return jsonify({'clicks': 0, 'level': 1})

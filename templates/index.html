@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Кликер с божьей коровкой</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
 </head>
 <body>
     <div class="container">
@@ -31,15 +32,34 @@
     </div>
 
     <script>
-        const userId = new URLSearchParams(window.location.search).get('user');
+        // Инициализация Telegram Web App
+        Telegram.WebApp.ready();
+        Telegram.WebApp.expand();
+        
+        // Получение данных пользователя
+        const initData = Telegram.WebApp.initDataUnsafe;
+        const userId = initData.user ? initData.user.id : null;
+        
+        if (!userId) {
+            document.body.innerHTML = '<div class="error">Ошибка: не удалось получить данные пользователя</div>';
+        }
         
         // Загрузка статистики при запуске
-        fetch(`/stats?user=${userId}`)
-            .then(response => response.json())
-            .then(data => {
-                document.getElementById('clicks').textContent = data.clicks;
-                document.getElementById('level').textContent = data.level;
-            });
+        fetch('/stats', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({user_id: userId})
+        })
+        .then(response => response.json())
+        .then(data => {
+            document.getElementById('clicks').textContent = data.clicks;
+            document.getElementById('level').textContent = data.level;
+        })
+        .catch(error => {
+            console.error('Error loading stats:', error);
+        });
         
         function clickLadybug() {
             fetch('/click', {
@@ -47,7 +67,7 @@
                 headers: {
                     'Content-Type': 'application/json',
                 },
-                body: JSON.stringify({user: userId})
+                body: JSON.stringify({user_id: userId})
             })
             .then(response => response.json())
             .then(data => {
@@ -62,6 +82,9 @@
                         ladybug.style.transform = 'scale(1)';
                     }, 100);
                 }
+            })
+            .catch(error => {
+                console.error('Error:', error);
             });
         }
     </script>

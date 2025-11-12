@@ -1,5 +1,5 @@
 import logging
-from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup
+from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup, WebAppInfo
 from telegram.ext import Application, CommandHandler, ContextTypes
 import os
 
@@ -12,16 +12,15 @@ TOKEN = os.environ.get('TELEGRAM_TOKEN')
 APP_URL = os.environ.get('APP_URL')  # URL вашего приложения на render.com
 
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
-    """Отправляет приветственное сообщение с кнопкой для запуска игры"""
-    user_id = update.effective_user.id
+    """Отправляет приветственное сообщение с кнопкой Web App"""
     keyboard = [
-        [InlineKeyboardButton("🎮 Играть в кликер", url=f"{APP_URL}?user={user_id}")]
+        [InlineKeyboardButton("🎮 Играть в кликер", web_app=WebAppInfo(url=APP_URL))]
     ]
     reply_markup = InlineKeyboardMarkup(keyboard)
     
     await update.message.reply_text(
         "🌟 Добро пожаловать в Кликер божьей коровки!\n\n"
-        "Нажмите кнопку ниже, чтобы начать играть. "
+        "Нажмите кнопку ниже, чтобы начать играть прямо в Telegram. "
         "Кликайте на божью коровку, чтобы зарабатывать очки и повышать уровень!",
         reply_markup=reply_markup
     )
@@ -38,15 +37,13 @@ async def help_command(update: Update, context: ContextTypes.DEFAULT_TYPE) -> No
 
 def main() -> None:
     """Запуск бота"""
-    # Создаем приложение с токеном
     application = Application.builder().token(TOKEN).build()
 
-    # Добавляем обработчики команд
     application.add_handler(CommandHandler("start", start))
     application.add_handler(CommandHandler("help", help_command))
 
-    # Запуск бота в режиме polling
-    application.run_polling(allowed_updates=Update.ALL_TYPES)
+    # Запуск бота
+    application.run_polling()
 
 if __name__ == "__main__":
     main()
