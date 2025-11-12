@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <title>Божья Коровка Кликер</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div class="container">
+    <h1>🐝 Божья Коровка Кликер 🐞</h1>
+    
+    <div class="stats">
+      <div class="stat-item">
+        Очки: <span id="score">0</span>
+      </div>
+      <div class="stat-item">
+        Рекорд: <span id="highScore">0</span>
+      </div>
+      <div class="stat-item">
+        Уровень: <span id="level">1</span>
+      </div>
+    </div>
+
+    <div class="progressBar">
+      <div class="progressFill" id="progressFill" style="width: 0%"></div>
+    </div>
+
+    <div id="progressText">0 / 10 очков до следующего уровня</div>
+
+    <img id="clickable" 
+         src="https://upload.wikimedia.org/wikipedia/commons/5/56/Ladybug_%2817299778972%29.jpg" 
+         alt="Ladybug"
+         onclick="handleClick(event)">
+
+    <div class="achievements" id="achievements">
+      <!-- Достижения будут добавляться сюда -->
+    </div>
+  </div>
+
+  <!-- Звук клика (используем внешний URL) -->
+  <audio id="clickSound" 
+         src="https://www.soundjay.com/buttons/sounds/button-09.mp3" 
+         preload="auto"></audio>
+
+  <script src="main.js"></script>
+</body>
+</html>
