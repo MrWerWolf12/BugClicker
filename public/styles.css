@@ -189,7 +189,7 @@ h1 {
   flex-wrap: wrap;
 }
 
-.save-btn, .load-btn {
+.save-btn, .load-btn, .leaderboard-btn {
   background: linear-gradient(135deg, #4CAF50, #45a049);
   color: white;
   border: none;
@@ -209,12 +209,17 @@ h1 {
   box-shadow: 0 4px 15px rgba(33, 150, 243, 0.3);
 }
 
-.save-btn:hover, .load-btn:hover {
+.leaderboard-btn {
+  background: linear-gradient(135deg, #ff6b6b, #ee5a24);
+  box-shadow: 0 4px 15px rgba(255, 107, 107, 0.3);
+}
+
+.save-btn:hover, .load-btn:hover, .leaderboard-btn:hover {
   transform: translateY(-2px);
   box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
 }
 
-.save-btn:active, .load-btn:active {
+.save-btn:active, .load-btn:active, .leaderboard-btn:active {
   transform: translateY(0);
 }
 
@@ -265,7 +270,7 @@ h1 {
     align-items: center;
   }
   
-  .save-btn, .load-btn {
+  .save-btn, .load-btn, .leaderboard-btn {
     width: 80%;
     padding: 15px;
   }
@@ -457,4 +462,151 @@ h1 {
 .yandex-theme .upgrade-cost {
   background: white;
   color: #ff0000 !important;
+}
+
+/* Модальное окно лидеров */
+.modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.8);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 2000;
+  backdrop-filter: blur(5px);
+}
+
+.modal-content {
+  background: white;
+  border-radius: 20px;
+  padding: 0;
+  max-width: 90%;
+  width: 500px;
+  max-height: 80vh;
+  overflow: hidden;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+}
+
+.modal-header {
+  background: linear-gradient(135deg, #667eea, #764ba2);
+  color: white;
+  padding: 20px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-radius: 20px 20px 0 0;
+}
+
+.modal-header h2 {
+  margin: 0;
+  font-size: 1.5em;
+}
+
+.close-button {
+  font-size: 2em;
+  cursor: pointer;
+  background: none;
+  border: none;
+  color: white;
+  opacity: 0.8;
+  transition: opacity 0.3s;
+}
+
+.close-button:hover {
+  opacity: 1;
+}
+
+.modal-body {
+  padding: 20px;
+  max-height: 60vh;
+  overflow-y: auto;
+}
+
+.leaderboard-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 1em;
+}
+
+.leaderboard-table th {
+  background: #f8f9fa;
+  padding: 12px;
+  text-align: left;
+  border-bottom: 2px solid #e9ecef;
+  font-weight: bold;
+  color: #495057;
+}
+
+.leaderboard-table td {
+  padding: 12px;
+  border-bottom: 1px solid #e9ecef;
+}
+
+.leaderboard-table tr:hover {
+  background: #f8f9fa;
+}
+
+.leaderboard-table .current-user {
+  background: linear-gradient(135deg, #fff3cd, #ffeaa7);
+  font-weight: bold;
+}
+
+.leaderboard-table .current-user td:first-child {
+  color: #ff6b6b;
+  font-weight: bold;
+}
+
+.leaderboard-table .user-row td:first-child {
+  background: #ffd700;
+  color: #333;
+  font-weight: bold;
+}
+
+.leaderboard-btn {
+  background: linear-gradient(135deg, #ff6b6b, #ee5a24);
+  color: white;
+  border: none;
+  padding: 12px 20px;
+  margin: 5px;
+  border-radius: 25px;
+  cursor: pointer;
+  font-size: 1em;
+  font-weight: bold;
+  box-shadow: 0 4px 15px rgba(255, 107, 107, 0.3);
+  transition: all 0.3s ease;
+  min-width: 120px;
+}
+
+.leaderboard-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
+}
+
+.leaderboard-btn:active {
+  transform: translateY(0);
+}
+
+/* Адаптивность для модального окна */
+@media (max-width: 600px) {
+  .modal-content {
+    width: 95%;
+    margin: 10px;
+  }
+  
+  .leaderboard-table th,
+  .leaderboard-table td {
+    padding: 8px;
+    font-size: 0.9em;
+  }
+  
+  .modal-header h2 {
+    font-size: 1.2em;
+  }
+  
+  .modal-header {
+    padding: 15px;
+  }
 }

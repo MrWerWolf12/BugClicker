@@ -118,6 +118,24 @@ class Database {
       client.release();
     }
   }
+
+  // Новый метод для получения ранга пользователя
+  static async getUserRank(telegramId) {
+    const client = await pool.connect();
+    try {
+      const result = await client.query(
+        `SELECT COUNT(*) + 1 as rank 
+         FROM users 
+         WHERE high_score > (SELECT high_score FROM users WHERE telegram_id = $1)`,
+        [telegramId]
+      );
+      return parseInt(result.rows[0].rank);
+    } catch (error) {
+      throw error;
+    } finally {
+      client.release();
+    }
+  }
 }
 
 module.exports = { Database, pool };

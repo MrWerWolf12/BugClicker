@@ -10,6 +10,7 @@ class ClickerGame {
     this.achievements = [];
     this.telegramId = null;
     this.userName = 'Гость';
+    this.userRank = 0;
     
     this.upgrades = {
       yandexSearch: { level: 0, cost: 50, multiplier: 1 },
@@ -534,6 +535,108 @@ class ClickerGame {
     // Обновляем магазин
     this.renderUpgrades();
   }
+
+  async showLeaderboard() {
+    try {
+      const response = await fetch('/api/leaderboard');
+      const leaderboardData = await response.json();
+      
+      // Найти ранг текущего пользователя
+      let userRank = 0;
+      const userInTop10 = leaderboardData.findIndex(player => 
+        player.telegram_id === this.telegramId
+      );
+      
+      if (userInTop10 === -1) {
+        // Пользователь не в топ-10, получаем его ранг
+        const rankResponse = await fetch(`/api/user/${this.telegramId}/rank`);
+        const rankData = await rankResponse.json();
+        userRank = rankData.rank || 0;
+      }
+      
+      this.showLeaderboardModal(leaderboardData, userRank, userInTop10);
+    } catch (error) {
+      console.error('Ошибка получения таблицы лидеров:', error);
+      this.showNotification('❌ Ошибка загрузки лидеров', true);
+    }
+  }
+
+  showLeaderboardModal(leaderboardData, userRank, userInTop10) {
+    // Создаем модальное окно
+    const modal = document.createElement('div');
+    modal.className = 'modal';
+    modal.innerHTML = `
+      <div class="modal-content">
+        <div class="modal-header">
+          <h2>🏆 Таблица лидеров</h2>
+          <span class="close-button" onclick="this.closest('.modal').remove()">&times;</span>
+        </div>
+        <div class="modal-body">
+          <table class="leaderboard-table">
+            <thead>
+              <tr>
+                <th>Место</th>
+                <th>Игрок</th>
+                <th>Очки</th>
+                <th>Уровень</th>
+              </tr>
+            </thead>
+            <tbody id="leaderboardBody">
+              <!-- Данные будут добавлены сюда -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+    `;
+    
+    document.body.appendChild(modal);
+    
+    const tbody = modal.querySelector('#leaderboardBody');
+    
+    // Добавляем топ-10
+    leaderboardData.forEach((player, index) => {
+      const row = document.createElement('tr');
+      if (player.telegram_id === this.telegramId) {
+        row.classList.add('current-user');
+      }
+      
+      row.innerHTML = `
+        <td>${index + 1}</td>
+        <td>${this.maskUserId(player.telegram_id)}</td>
+        <td>${player.high_score || player.score || 0}</td>
+        <td>${player.level || 1}</td>
+      `;
+      tbody.appendChild(row);
+    });
+    
+    // Если пользователя нет в топ-10, добавляем его
+    if (userInTop10 === -1 && userRank > 10 && this.telegramId) {
+      const userRow = document.createElement('tr');
+      userRow.classList.add('current-user', 'user-row');
+      userRow.innerHTML = `
+        <td>${userRank}</td>
+        <td>${this.userName || this.maskUserId(this.telegramId)} (Вы)</td>
+        <td>${this.highScore}</td>
+        <td>${this.level}</td>
+      `;
+      tbody.appendChild(userRow);
+    }
+  }
+
+  maskUserId(telegramId) {
+    if (!telegramId) return 'Аноним';
+    
+    // Для тестовых пользователей
+    if (telegramId.startsWith('test_user_')) {
+      return 'Тестовый игрок';
+    }
+    
+    // Маскируем ID для приватности
+    if (telegramId.length > 4) {
+      return 'Игрок_' + telegramId.substring(telegramId.length - 4);
+    }
+    return 'Игрок_' + telegramId;
+  }
 }
 
 // Инициализация игры
@@ -550,6 +653,10 @@ function saveGame() {
 
 function loadGame() {
   game.loadGame();
+}
+
+function showLeaderboard() {
+  game.showLeaderboard();
 }
 
 // Предзагрузка звука

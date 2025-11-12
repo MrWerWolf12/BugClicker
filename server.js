@@ -56,6 +56,18 @@ app.get('/api/leaderboard', async (req, res) => {
   }
 });
 
+// Новый endpoint для получения ранга пользователя
+app.get('/api/user/:telegramId/rank', async (req, res) => {
+  try {
+    const telegramId = req.params.telegramId;
+    const rank = await Database.getUserRank(telegramId);
+    res.json({ rank: rank });
+  } catch (error) {
+    console.error('Error getting user rank:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
 app.get('/', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
