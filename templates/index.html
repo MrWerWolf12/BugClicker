@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Кликер с божьей коровкой</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <div class="container">
+        <h1>Кликер божьей коровки</h1>
+        <div class="stats">
+            <div>Клики: <span id="clicks">0</span></div>
+            <div>Уровень: <span id="level">1</span></div>
+        </div>
+        
+        <div class="game-area">
+            <!-- Божья коровка для кликов -->
+            <img id="ladybug" src="https://cdn-icons-png.flaticon.com/512/1998/1998627.png" 
+                 alt="Божья коровка" onclick="clickLadybug()">
+            
+            <!-- Декоративные элементы -->
+            <img class="decoration leaf" src="https://cdn-icons-png.flaticon.com/512/3543/3543696.png" alt="Лист">
+            <img class="decoration flower" src="https://cdn-icons-png.flaticon.com/512/992/992691.png" alt="Цветок">
+            <img class="decoration cloud" src="https://cdn-icons-png.flaticon.com/512/414/414927.png" alt="Облако">
+        </div>
+        
+        <div class="instructions">
+            Кликай на божью коровку, чтобы зарабатывать очки!
+        </div>
+    </div>
+
+    <script>
+        const userId = new URLSearchParams(window.location.search).get('user');
+        
+        // Загрузка статистики при запуске
+        fetch(`/stats?user=${userId}`)
+            .then(response => response.json())
+            .then(data => {
+                document.getElementById('clicks').textContent = data.clicks;
+                document.getElementById('level').textContent = data.level;
+            });
+        
+        function clickLadybug() {
+            fetch('/click', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({user: userId})
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (!data.error) {
+                    document.getElementById('clicks').textContent = data.clicks;
+                    document.getElementById('level').textContent = data.level;
+                    
+                    // Анимация при клике
+                    const ladybug = document.getElementById('ladybug');
+                    ladybug.style.transform = 'scale(0.9)';
+                    setTimeout(() => {
+                        ladybug.style.transform = 'scale(1)';
+                    }, 100);
+                }
+            });
+        }
+    </script>
+</body>
+</html>
