@@ -52,7 +52,6 @@ class ClickerGame {
     if (this.userInfoElement) {
       this.userInfoElement.innerHTML = `
         <div><strong>Игрок:</strong> ${this.userName}</div>
-        <div><strong>ID:</strong> ${this.telegramId}</div>
       `;
     }
   }
