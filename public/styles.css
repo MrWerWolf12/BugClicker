@@ -364,3 +364,87 @@ h1 {
   75% { box-shadow: 0 0 20px #ff9800; }
   100% { box-shadow: 0 0 20px #ff6b6b; }
 }
+
+.shop {
+  margin-top: 25px;
+  padding: 15px;
+  background: linear-gradient(135deg, #ffeb3b, #ffc107);
+  border-radius: 15px;
+  border: 2px solid #ff9800;
+}
+
+.shop h3 {
+  margin-top: 0;
+  color: #333;
+  text-align: center;
+}
+
+.coins {
+  font-size: 1.2em;
+  font-weight: bold;
+  color: #333;
+  margin-bottom: 15px;
+}
+
+.upgrades-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: 10px;
+}
+
+.upgrade-item {
+  background: white;
+  border-radius: 10px;
+  padding: 10px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+  cursor: pointer;
+  transition: all 0.3s ease;
+  border: 2px solid #ddd;
+}
+
+.upgrade-item:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+}
+
+.upgrade-item.purchased {
+  background: #e8f5e8;
+  border-color: #4CAF50;
+}
+
+.upgrade-item.unavailable {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.upgrade-icon {
+  font-size: 2em;
+  margin-bottom: 5px;
+}
+
+.upgrade-name {
+  font-weight: bold;
+  font-size: 0.9em;
+  margin: 5px 0;
+}
+
+.upgrade-cost {
+  color: #ff9800;
+  font-weight: bold;
+  font-size: 0.9em;
+}
+
+.upgrade-level {
+  font-size: 0.8em;
+  color: #666;
+}
+
+/* Яндекс стили */
+.yandex-theme {
+  background: linear-gradient(135deg, #ff0000, #ffcc00);
+  border-color: #ff0000 !important;
+}
+
+.yandex-theme .upgrade-icon {
+  color: #ff0000;
+}

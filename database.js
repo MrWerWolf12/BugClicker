@@ -1,10 +1,8 @@
 const sqlite3 = require('sqlite3').verbose();
 const path = require('path');
 
-// Создаем базу данных в памяти или файл
 const db = new sqlite3.Database(path.join(__dirname, 'clicker.db'));
 
-// Создаем таблицу для пользователей
 db.serialize(() => {
   db.run(`CREATE TABLE IF NOT EXISTS users (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -12,13 +10,14 @@ db.serialize(() => {
     score INTEGER DEFAULT 0,
     level INTEGER DEFAULT 1,
     high_score INTEGER DEFAULT 0,
+    coins INTEGER DEFAULT 0,
+    upgrades TEXT DEFAULT '{}',
     achievements TEXT DEFAULT '[]',
     last_updated DATETIME DEFAULT CURRENT_TIMESTAMP
   )`);
 });
 
 class Database {
-  // Получить или создать пользователя
   static async getUser(telegramId) {
     return new Promise((resolve, reject) => {
       db.get(
@@ -32,7 +31,6 @@ class Database {
     });
   }
 
-  // Создать нового пользователя
   static async createUser(telegramId) {
     return new Promise((resolve, reject) => {
       db.run(
@@ -40,21 +38,29 @@ class Database {
         [telegramId],
         function(err) {
           if (err) reject(err);
-          resolve({ id: this.lastID, telegram_id: telegramId, score: 0, level: 1, high_score: 0, achievements: '[]' });
+          resolve({ 
+            id: this.lastID, 
+            telegram_id: telegramId, 
+            score: 0, 
+            level: 1, 
+            high_score: 0, 
+            coins: 0,
+            upgrades: '{}',
+            achievements: '[]' 
+          });
         }
       );
     });
   }
 
-  // Обновить данные пользователя
   static async updateUser(telegramId, data) {
     return new Promise((resolve, reject) => {
-      const { score, level, highScore, achievements } = data;
+      const { score, level, highScore, coins, upgrades, achievements } = data;
       db.run(
         `UPDATE users SET 
-         score = ?, level = ?, high_score = ?, achievements = ?, last_updated = CURRENT_TIMESTAMP 
+         score = ?, level = ?, high_score = ?, coins = ?, upgrades = ?, achievements = ?, last_updated = CURRENT_TIMESTAMP 
          WHERE telegram_id = ?`,
-        [score, level, highScore, JSON.stringify(achievements), telegramId],
+        [score, level, highScore, coins || 0, JSON.stringify(upgrades || {}), JSON.stringify(achievements), telegramId],
         function(err) {
           if (err) reject(err);
           resolve(this.changes);
@@ -63,11 +69,10 @@ class Database {
     });
   }
 
-  // Получить топ игроков
   static async getTopPlayers(limit = 10) {
     return new Promise((resolve, reject) => {
       db.all(
-        'SELECT telegram_id, high_score, level FROM users ORDER BY high_score DESC LIMIT ?',
+        'SELECT telegram_id, high_score, level, coins FROM users ORDER BY high_score DESC LIMIT ?',
         [limit],
         (err, rows) => {
           if (err) reject(err);

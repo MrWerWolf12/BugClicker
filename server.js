@@ -9,7 +9,6 @@ const PORT = process.env.PORT || 3000;
 app.use(bodyParser.json());
 app.use(express.static(path.join(__dirname, 'public')));
 
-// Получить данные пользователя
 app.get('/api/user/:telegramId', async (req, res) => {
   try {
     const telegramId = req.params.telegramId;
@@ -18,8 +17,8 @@ app.get('/api/user/:telegramId', async (req, res) => {
     if (!user) {
       user = await Database.createUser(telegramId);
     } else {
-      // Парсим achievements из строки в массив
       user.achievements = JSON.parse(user.achievements || '[]');
+      user.upgrades = JSON.parse(user.upgrades || '{}');
     }
     
     res.json(user);
@@ -28,7 +27,6 @@ app.get('/api/user/:telegramId', async (req, res) => {
   }
 });
 
-// Обновить данные пользователя
 app.post('/api/user/:telegramId', async (req, res) => {
   try {
     const telegramId = req.params.telegramId;
@@ -41,7 +39,6 @@ app.post('/api/user/:telegramId', async (req, res) => {
   }
 });
 
-// Получить топ игроков
 app.get('/api/leaderboard', async (req, res) => {
   try {
     const players = await Database.getTopPlayers(10);
