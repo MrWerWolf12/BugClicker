@@ -9,6 +9,11 @@ const PORT = process.env.PORT || 3000;
 app.use(bodyParser.json());
 app.use(express.static(path.join(__dirname, 'public')));
 
+// Health check endpoint
+app.get('/health', (req, res) => {
+  res.status(200).json({ status: 'OK', timestamp: new Date().toISOString() });
+});
+
 app.get('/api/user/:telegramId', async (req, res) => {
   try {
     const telegramId = req.params.telegramId;
@@ -23,6 +28,7 @@ app.get('/api/user/:telegramId', async (req, res) => {
     
     res.json(user);
   } catch (error) {
+    console.error('Error getting user:', error);
     res.status(500).json({ error: error.message });
   }
 });
@@ -35,6 +41,7 @@ app.post('/api/user/:telegramId', async (req, res) => {
     const result = await Database.updateUser(telegramId, userData);
     res.json({ success: true, changes: result });
   } catch (error) {
+    console.error('Error updating user:', error);
     res.status(500).json({ error: error.message });
   }
 });
@@ -44,6 +51,7 @@ app.get('/api/leaderboard', async (req, res) => {
     const players = await Database.getTopPlayers(10);
     res.json(players);
   } catch (error) {
+    console.error('Error getting leaderboard:', error);
     res.status(500).json({ error: error.message });
   }
 });
