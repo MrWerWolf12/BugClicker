@@ -9,7 +9,7 @@
 </head>
 <body>
   <div class="container">
-    <h1>🐞Игры багхантеров🐞</h1>
+    <h1>🐝 Божья Коровка Кликер 🐞</h1>
     
     <div class="user-info" id="userInfo">
       <!-- Информация о пользователе будет здесь -->
@@ -39,7 +39,16 @@
          onclick="handleClick(event)">
 
     <div class="achievements" id="achievements">
+      <h3>Достижения</h3>
       <!-- Достижения будут добавляться сюда -->
+    </div>
+    
+    <div class="shop" id="shop">
+      <h3>🛍️ Магазин Яндекс Улучшений</h3>
+      <div class="coins">🟡 Монеты: <span id="coins">0</span></div>
+      <div class="upgrades-grid" id="upgradesGrid">
+        <!-- Улучшения будут добавлены сюда -->
+      </div>
     </div>
     
     <div class="actions">
@@ -47,16 +56,6 @@
       <button onclick="loadGame()" class="load-btn">📥 Загрузить</button>
     </div>
   </div>
-
-
-<div class="shop" id="shop">
-  <h3>🛍️ Магазин Яндекс Улучшений</h3>
-  <div class="coins">🟡 Монеты: <span id="coins">0</span></div>
-  <div class="upgrades-grid" id="upgradesGrid">
-    <!-- Улучшения будут добавлены сюда -->
-  </div>
-</div>
-
 
   <!-- Звук клика -->
   <audio id="clickSound" 

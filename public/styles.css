@@ -365,6 +365,7 @@ h1 {
   100% { box-shadow: 0 0 20px #ff6b6b; }
 }
 
+/* Магазин */
 .shop {
   margin-top: 25px;
   padding: 15px;
@@ -429,9 +430,14 @@ h1 {
 }
 
 .upgrade-cost {
-  color: #ff9800;
+  color: white;
   font-weight: bold;
   font-size: 0.9em;
+  background: #ff9800;
+  padding: 2px 6px;
+  border-radius: 10px;
+  display: inline-block;
+  margin: 5px 0;
 }
 
 .upgrade-level {
@@ -439,7 +445,6 @@ h1 {
   color: #666;
 }
 
-/* Яндекс стили */
 .yandex-theme {
   background: linear-gradient(135deg, #ff0000, #ffcc00);
   border-color: #ff0000 !important;
@@ -447,4 +452,9 @@ h1 {
 
 .yandex-theme .upgrade-icon {
   color: #ff0000;
+}
+
+.yandex-theme .upgrade-cost {
+  background: white;
+  color: #ff0000 !important;
 }

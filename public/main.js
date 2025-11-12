@@ -495,6 +495,9 @@ class ClickerGame {
     if (this.progressText) {
       this.progressText.textContent = `${progress.current} / ${progress.required} очков до следующего уровня`;
     }
+    
+    // Обновляем магазин при каждом обновлении
+    this.renderUpgrades();
   }
 }
 
