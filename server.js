@@ -17,10 +17,12 @@ app.get('/health', (req, res) => {
 app.get('/api/user/:telegramId', async (req, res) => {
   try {
     const telegramId = req.params.telegramId;
+    const username = req.query.username || null;
+    
     let user = await Database.getUser(telegramId);
     
     if (!user) {
-      user = await Database.createUser(telegramId);
+      user = await Database.createUser(telegramId, username);
     } else {
       user.achievements = JSON.parse(user.achievements || '[]');
       user.upgrades = JSON.parse(user.upgrades || '{}');

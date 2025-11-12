@@ -13,10 +13,12 @@ const pool = new Pool({
 async function initializeDatabase() {
   const client = await pool.connect();
   try {
+    // Создаем таблицу с дополнительным полем username
     await client.query(`
       CREATE TABLE IF NOT EXISTS users (
         id SERIAL PRIMARY KEY,
         telegram_id TEXT UNIQUE NOT NULL,
+        username TEXT,
         score INTEGER DEFAULT 0,
         level INTEGER DEFAULT 1,
         high_score INTEGER DEFAULT 0,
@@ -59,16 +61,16 @@ class Database {
     }
   }
 
-  static async createUser(telegramId) {
+  static async createUser(telegramId, username = null) {
     const client = await pool.connect();
     try {
       const result = await client.query(
-        `INSERT INTO users (telegram_id) 
-         VALUES ($1) 
+        `INSERT INTO users (telegram_id, username) 
+         VALUES ($1, $2) 
          ON CONFLICT (telegram_id) 
          DO NOTHING 
          RETURNING *`,
-        [telegramId]
+        [telegramId, username || null]
       );
       
       if (result.rows.length > 0) {
@@ -88,13 +90,13 @@ class Database {
   static async updateUser(telegramId, data) {
     const client = await pool.connect();
     try {
-      const { score, level, highScore, coins, upgrades, achievements } = data;
+      const { score, level, highScore, coins, upgrades, achievements, username } = data;
       const result = await client.query(
         `UPDATE users SET 
          score = $1, level = $2, high_score = $3, coins = $4, 
-         upgrades = $5, achievements = $6, last_updated = CURRENT_TIMESTAMP 
-         WHERE telegram_id = $7`,
-        [score, level, highScore, coins || 0, JSON.stringify(upgrades || {}), JSON.stringify(achievements), telegramId]
+         upgrades = $5, achievements = $6, username = $7, last_updated = CURRENT_TIMESTAMP 
+         WHERE telegram_id = $8`,
+        [score, level, highScore, coins || 0, JSON.stringify(upgrades || {}), JSON.stringify(achievements), username || null, telegramId]
       );
       return result.rowCount;
     } catch (error) {
@@ -108,7 +110,10 @@ class Database {
     const client = await pool.connect();
     try {
       const result = await client.query(
-        'SELECT telegram_id, high_score, level, coins FROM users ORDER BY high_score DESC LIMIT $1',
+        `SELECT telegram_id, high_score, level, coins, username
+         FROM users 
+         ORDER BY high_score DESC 
+         LIMIT $1`,
         [limit]
       );
       return result.rows;

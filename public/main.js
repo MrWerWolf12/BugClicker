@@ -11,6 +11,7 @@ class ClickerGame {
     this.telegramId = null;
     this.userName = 'Гость';
     this.userRank = 0;
+    this.telegramUsername = null;
     
     this.upgrades = {
       yandexSearch: { level: 0, cost: 50, multiplier: 1 },
@@ -49,12 +50,14 @@ class ClickerGame {
       if (webApp.initDataUnsafe && webApp.initDataUnsafe.user) {
         this.telegramId = webApp.initDataUnsafe.user.id.toString();
         this.userName = webApp.initDataUnsafe.user.first_name;
+        this.telegramUsername = webApp.initDataUnsafe.user.username;
         this.updateUserInfo();
         this.loadGame();
       }
     } else {
       this.telegramId = 'test_user_' + Math.random().toString(36).substr(2, 9);
       this.userName = 'Тестовый пользователь';
+      this.telegramUsername = null;
       this.updateUserInfo();
       this.loadGame();
     }
@@ -94,7 +97,13 @@ class ClickerGame {
     try {
       document.body.classList.add('loading');
       
-      const response = await fetch(`/api/user/${this.telegramId}`);
+      // Передаем username в query параметрах
+      const params = new URLSearchParams();
+      if (this.telegramUsername) {
+        params.append('username', this.telegramUsername);
+      }
+      
+      const response = await fetch(`/api/user/${this.telegramId}${params.toString() ? '?' + params.toString() : ''}`);
       const userData = await response.json();
       
       if (userData) {
@@ -159,7 +168,8 @@ class ClickerGame {
           highScore: this.highScore,
           coins: this.coins,
           upgrades: this.upgrades,
-          achievements: this.achievements
+          achievements: this.achievements,
+          username: this.telegramUsername
         })
       });
 
@@ -602,7 +612,7 @@ class ClickerGame {
       
       row.innerHTML = `
         <td>${index + 1}</td>
-        <td>${this.maskUserId(player.telegram_id)}</td>
+        <td>${this.maskUserId(player.telegram_id, player.username)}</td>
         <td>${player.high_score || player.score || 0}</td>
         <td>${player.level || 1}</td>
       `;
@@ -615,7 +625,7 @@ class ClickerGame {
       userRow.classList.add('current-user', 'user-row');
       userRow.innerHTML = `
         <td>${userRank}</td>
-        <td>${this.userName || this.maskUserId(this.telegramId)} (Вы)</td>
+        <td>${this.telegramUsername ? '@' + this.telegramUsername : (this.userName || this.maskUserId(this.telegramId))} (Вы)</td>
         <td>${this.highScore}</td>
         <td>${this.level}</td>
       `;
@@ -623,7 +633,12 @@ class ClickerGame {
     }
   }
 
-  maskUserId(telegramId) {
+  maskUserId(telegramId, username = null) {
+    // Если есть username, используем его
+    if (username) {
+      return '@' + username;
+    }
+    
     if (!telegramId) return 'Аноним';
     
     // Для тестовых пользователей
