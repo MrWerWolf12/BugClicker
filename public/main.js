@@ -82,30 +82,35 @@ class ClickerGame {
   }
 
   async loadGame() {
-    if (!this.telegramId) return;
+  if (!this.telegramId) return;
 
-    try {
-      document.body.classList.add('loading');
+  try {
+    document.body.classList.add('loading');
+    
+    const response = await fetch(`/api/user/${this.telegramId}`);
+    const userData = await response.json();
+    
+    if (userData) {
+      this.score = userData.score || 0;
+      this.level = userData.level || 1;
+      this.highScore = userData.high_score || 0;
+      this.clickPower = this.level;
+      this.achievements = JSON.parse(userData.achievements || '[]');
       
-      const response = await fetch(`/api/user/${this.telegramId}`);
-      const userData = await response.json();
-      
-      if (userData) {
-        this.score = userData.score || 0;
-        this.level = userData.level || 1;
-        this.highScore = userData.high_score || 0;
-        this.clickPower = this.level;
-        this.achievements = JSON.parse(userData.achievements || '[]');
-        
+      // Гарантируем обновление отображения
+      setTimeout(() => {
         this.updateDisplay();
         this.renderAchievements();
-      }
-    } catch (error) {
-      console.error('Ошибка загрузки игры:', error);
-    } finally {
-      document.body.classList.remove('loading');
+      }, 100);
     }
+  } catch (error) {
+    console.error('Ошибка загрузки игры:', error);
+  } finally {
+    setTimeout(() => {
+      document.body.classList.remove('loading');
+    }, 500);
   }
+}
 
   async saveGame() {
     if (!this.telegramId) return;
