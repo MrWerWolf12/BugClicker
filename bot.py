@@ -1,6 +1,6 @@
 import logging
 from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup
-from telegram.ext import Application, CommandHandler, CallbackQueryHandler, ContextTypes
+from telegram.ext import Application, CommandHandler, ContextTypes
 import os
 
 # Включаем логирование
@@ -13,8 +13,9 @@ APP_URL = os.environ.get('APP_URL')  # URL вашего приложения н�
 
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     """Отправляет приветственное сообщение с кнопкой для запуска игры"""
+    user_id = update.effective_user.id
     keyboard = [
-        [InlineKeyboardButton("🎮 Играть в кликер", url=f"{APP_URL}?user={update.effective_user.id}")]
+        [InlineKeyboardButton("🎮 Играть в кликер", url=f"{APP_URL}?user={user_id}")]
     ]
     reply_markup = InlineKeyboardMarkup(keyboard)
     
@@ -37,13 +38,15 @@ async def help_command(update: Update, context: ContextTypes.DEFAULT_TYPE) -> No
 
 def main() -> None:
     """Запуск бота"""
+    # Создаем приложение с токеном
     application = Application.builder().token(TOKEN).build()
 
+    # Добавляем обработчики команд
     application.add_handler(CommandHandler("start", start))
     application.add_handler(CommandHandler("help", help_command))
 
-    # Запуск бота
-    application.run_polling()
+    # Запуск бота в режиме polling
+    application.run_polling(allowed_updates=Update.ALL_TYPES)
 
 if __name__ == "__main__":
     main()
